@@ -23,18 +23,32 @@ users.push({
     age: 30
 });
 
-app.use('/users', (req, res, next)=> { 
+app.use('/users', (req: Request, res: Response, next: NextFunction)=> { 
     console.log(`${req.method}, ${req.url}`);
     next();
 });
 
-app.use('/users', (req, res, next)=> {
+app.use('/users', (req: Request, res: Response, next: NextFunction)=> {
     console.log('Time:', Date.now());
     next();
 })
 
 app.get('/users', (req: Request, res: Response) => {
   res.json(users);
+});
+
+app.use('/path', (req: Request, res: Response, next: NextFunction) => {
+    // Middleware-logik her
+    next(); // Send requesten videre til næste middleware eller route-handler
+});
+
+app.use((req, res, next) => {
+    try {
+        // Kode i tilfælde af success
+        next();
+    } catch (error) {
+        next(error); // kode i tilfælde af fejl
+    }
 });
 
 /* app.post('/users', (req: Request, res: Response) => {
