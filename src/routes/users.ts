@@ -1,16 +1,28 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { body, validationResult } from "express-validator";
+import { body, ContextRunner, validationResult } from "express-validator";
 import { User } from "../models/user";
 
 const router = Router();
 let users: User[] = [];
 
 const userValidationRules = [
-  body("name").notEmpty().withMessage("User skal have et navn"),
+  body("name").notEmpty().withMessage("Brugeren skal have et navn"),
+  body("name").isString().withMessage("Navn må ikke være tal"),
   body("age").isNumeric().withMessage("Alder skal være et tal"),
 ];
 
-router.get("/", userValidationRules, async (req: Request, res: Response) => {
+const validate = (userValidationRules: ContextRunner[]) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    for (const validation of userValidationRules) {
+      const result = await validation.run(req);
+      if (!result.isEmpty())
+        return res.status(400).json({ errors: result.array() });
+    }
+    next();
+  };
+};
+
+router.get("/", async (req: Request, res: Response) => {
   const response = await users;
   res.send(response);
 });
